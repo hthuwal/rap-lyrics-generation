@@ -11,7 +11,7 @@ stat = {}
 for a in artists:
     lyrics = ld.get_lyrics_from_artist(a)
     num_of_lyrics = len(lyrics)
-    
+
     verses_len = []
     for l in lyrics:
         nov = 0
@@ -25,21 +25,20 @@ for a in artists:
             else:
                 if isinstance(token, list):
                     count_of_tokens += len(token)
-    
+
         verses_len.append(nov)
-        
+
     np_arr = np.array(verses_len)
     all_nov = np_arr.sum()
     min_nov = np_arr.min()
     max_nov = np_arr.max()
     mean_nov = np_arr.mean()
     std_nov = np_arr.std()
-        
+
     all_tokens = ld.get_lyrics_from_artist_as_plain_list(a)
     uniq_vocab = len(set(all_tokens))
-        
-    print(a, num_of_lyrics, all_nov, uniq_vocab, max_nov, round(mean_nov,1), round(std_nov,1))
 
-l = ld.get_lyrics_from_artist_as_plain_list(artists[0])
-print(len(l),len(set(l)))
+    print(a, num_of_lyrics, all_nov, uniq_vocab, max_nov, round(mean_nov, 1), round(std_nov, 1))
 
+l = lpd.get_lyrics_from_artist_as_plain_list(artists[0])
+print(len(l), len(set(l)))

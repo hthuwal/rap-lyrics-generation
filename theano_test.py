@@ -1,50 +1,48 @@
-#import sys
-#sys.path.append('theano_lstm')
+# import sys
+# sys.path.append('theano_lstm')
 from util import *
 from common_lib.lyrics_database import LyricsDatabase
-import pickle
-import sys
 
 vocab = Vocab()
 
 myData = LyricsDatabase('fabolous_parsed/')
 
 print("Starting")
-#allTokens = myData.get_lyrics_from_artist_as_plain_list('jay')
+# allTokens = myData.get_lyrics_from_artist_as_plain_list('jay')
 
-#vocab.add_words(allTokens)
+# vocab.add_words(allTokens)
 
 verseList = myData.get_lyrics_from_artist_as_list_of_verses('fabolous')
 
 versecnt = 0
 
 for v in verseList:
-    if len(v) < 250:
+    if len(v) < 175:
         continue
-    versecnt+=1
-    #if len(v) <800:
-    vocab.add_words(v)#numerical_lines.append(vocab(v))
-print('verse count - ',versecnt)
-#print len(vocab)
-#sys.exit()
+    versecnt += 1
+    # if len(v) <800:
+    vocab.add_words(v)  # numerical_lines.append(vocab(v))
+print('verse count - ', versecnt)
+# print len(vocab)
+# sys.exit()
 
 
 numerical_lines = []
 for v in verseList:
-    if len(v) < 250:
+    if len(v) < 175:
         continue
-    #if len(v) <800:
+    # if len(v) <800:
     numerical_lines.append(vocab(v))
 
-#print len(numerical_lines)
-#sys.exit()
-#for line in open('sample_text').readlines():
+# print len(numerical_lines)
+# sys.exit()
+# for line in open('sample_text').readlines():
 #    vocab.add_words(line.strip("\n").split(" "))
 
-#numerical_lines = []
-#for line in open('sample_text').readlines():
+# numerical_lines = []
+# for line in open('sample_text').readlines():
 #    numerical_lines.append(vocab(line.strip("\n")))
-print("Vocab size",len(vocab))    
+print("Vocab size", len(vocab))
 numerical_lines, numerical_lengths = pad_into_matrix(numerical_lines)
 print('Building model')
 model = Model(
@@ -70,8 +68,8 @@ for i in range(20000):
         bestEr = error
         bestLyrics = vocab(model.greedy_fun(vocab.word2index["<startVerse>"]))
     if i % 1000 == 0:
-        with open('lstm_output/fabolous'+str(i), 'w') as f:
-            f.write(str(error)+'\n'+str(vocab(model.greedy_fun(vocab.word2index["<startVerse>"]))))
+        with open('lstm_output/fabolous' + str(i), 'w') as f:
+            f.write(str(error) + '\n' + str(vocab(model.greedy_fun(vocab.word2index["<startVerse>"]))))
 
 with open('lstm_output/fabolous-expanded', 'w') as f:
     f.write(str(bestLyrics))
