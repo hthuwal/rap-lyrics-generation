@@ -46,7 +46,7 @@ print("Vocab size", len(vocab))
 numerical_lines, numerical_lengths = pad_into_matrix(numerical_lines)
 print('Building model')
 model = Model(
-    input_size=len(vocab),
+    input_size=150,
     hidden_size=100,
     vocab_size=len(vocab),
     stack_size=2,
