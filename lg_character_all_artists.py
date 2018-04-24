@@ -1,17 +1,17 @@
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
-from tqdm import tqdm
 import pandas as pd
 
-import random
-import string
-import numpy as np
-
-import sys
 import os
-
+import string
 import torch.utils.data as data
+
+
+from common_lib.lyrics_database import LyricsDatabase
+from torch.autograd import Variable
+from tqdm import tqdm
+# from util import *
+
 
 all_characters = string.printable  # list of all characters that can be printed
 number_of_characters = len(all_characters)
@@ -30,6 +30,45 @@ def pad_sequence(seq, max_length, pad_label=100):
     """TODO: used pytorch's pad sequence instead"""
     seq += [pad_label for i in range(max_length - len(seq))]
     return seq
+
+
+class FabolousDataset(data.Dataset):
+
+    def __init__(self, min_num_words=None):
+
+        myData = LyricsDatabase('fabolous_parsed/')
+        self.verseList = myData.get_lyrics_from_artist_as_list_of_verses('fabolous')
+
+        if min_num_words is not None:
+            self.verseList = [verse for verse in self.verseList if len(verse) >= min_num_words]
+
+        for i in range(len(self.verseList)):
+            self.verseList[i] = " ".join(self.verseList[i])
+
+        self.max_text_len = len(max(self.verseList, key=lambda x: len(x)))
+        self.whole_dataset_len = len(self.verseList)
+
+    def __len__(self):
+        return self.whole_dataset_len
+
+    def __getitem__(self, index):
+
+        sequence_raw_string = self.verseList[index]
+
+        sequence_string_labels = string_to_labels(sequence_raw_string)
+
+        sequence_length = len(sequence_string_labels) - 1
+
+        input_string_labels = sequence_string_labels[:-1]
+        output_string_labels = sequence_string_labels[1:]
+
+        input_string_labels_padded = pad_sequence(input_string_labels, max_length=self.max_text_len)
+
+        output_string_labels_padded = pad_sequence(output_string_labels, max_length=self.max_text_len, pad_label=-100)
+
+        return (torch.LongTensor(input_string_labels_padded),
+                torch.LongTensor(output_string_labels_padded),
+                torch.LongTensor([sequence_length]))
 
 
 class LyricsGenerationDataset(data.Dataset):
@@ -96,7 +135,7 @@ class LG_LSTM(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes, n_layers=2):
 
         super(LG_LSTM, self).__init__()
-
+        self.epochs = 0
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.num_classes = num_classes
