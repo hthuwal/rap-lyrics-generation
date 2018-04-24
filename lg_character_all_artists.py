@@ -218,15 +218,25 @@ def sample_from_rnn(rnn, starting_sting="Why", sample_length=300, temperature=1)
     return sampled_string
 
 
+# use_cuda = False
+model_file = "rnn_character_all_artitst.model"
+
 print("Loading Dataset")
-trainset = LyricsGenerationDataset(csv_file_path='songdata.csv')
-trainset_loader = torch.utils.data.DataLoader(trainset, batch_size=100, shuffle=True, num_workers=1, drop_last=True)
-print("Training Model")
+
+# trainset = LyricsGenerationDataset(csv_file_path='songdata.csv')  # dataset of 55000 songs mixed artist
+trainset = FabolousDataset(min_num_words=175)  # fabulous dataset
+trainset_loader = torch.utils.data.DataLoader(trainset, batch_size=1, shuffle=False, num_workers=1, drop_last=True)
+
 rnn = LG_LSTM(input_size=len(all_characters) + 1, hidden_size=128, num_classes=len(all_characters))
+if os.path.exists(model_file):
+    print("Loading Model")
+    rnn.load_state_dict(torch.load(model_file, map_location=lambda storage, loc: storage))
 
 print("use_cuda ", use_cuda)
 if use_cuda:
     rnn.cuda()
+
+print("Training Model")
 
 learning_rate = 0.001
 optimizer = torch.optim.Adam(rnn.parameters(), lr=learning_rate)
@@ -240,8 +250,13 @@ for epoch_number in range(epochs_number):
 
         post_processed_batch_tuple = post_process_sequence_batch(batch)
         input_sequences_batch, output_sequences_batch, sequences_lengths = post_processed_batch_tuple
-        output_sequences_batch_var = Variable(output_sequences_batch.contiguous().view(-1).cuda())
-        input_sequences_batch_var = Variable(input_sequences_batch.cuda())
+        # print(input_sequences_batch.shape)
+        output_sequences_batch_var = Variable(output_sequences_batch.contiguous().view(-1))
+        input_sequences_batch_var = Variable(input_sequences_batch)
+
+        if use_cuda:
+            output_sequences_batch_var = output_sequences_batch_var.cuda()
+            input_sequences_batch_var = input_sequences_batch_var.cuda()
 
         optimizer.zero_grad()
 
@@ -251,9 +266,12 @@ for epoch_number in range(epochs_number):
         loss.backward()
 
         optimizer.step()
-    print("Epoch %d/%d: Loss:%f" % (epoch_number, epochs_number, loss))
+
+    rnn.epochs += 1
+    print("Epoch %d/%d: Total epochs:%d Loss:%f" % (epoch_number, epochs_number, rnn.epochs, loss))
     sent = sample_from_rnn(rnn)
     print("Generated\n", sent)
-    out_f = open('lg/%d' % (epoch_number), 'w')
+    out_f = open('lg/%d.txt' % (epoch_number), 'w')
+    out_f.write("Harish")
     out_f.write("%f\n" % (loss) + sent)
-    torch.save(rnn.state_dict(), 'conditional_rnn.pth')
+    torch.save(rnn.state_dict(), model_file)
