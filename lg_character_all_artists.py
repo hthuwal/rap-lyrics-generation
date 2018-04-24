@@ -23,7 +23,13 @@ def character_to_label(character):
 
 
 def string_to_labels(character_string):
-    return [character_to_label(char) for char in character_string]
+    # for loop is to catch characters that do not belong to string.printables (Took 2 hrs to reach this)
+    # for char in character_string:
+    #     if character_to_label(char) == -1:
+    #         print("Got Ya!", char)
+
+    # remove any character if it is not printable
+    return [character_to_label(char) for char in character_string if character_to_label(char) != -1]
 
 
 def pad_sequence(seq, max_length, pad_label=100):
@@ -147,14 +153,22 @@ class LG_LSTM(nn.Module):
         self.fcc_fc = nn.Linear(hidden_size, num_classes)
 
     def forward(self, input_sequences, input_sequences_lengths, hidden=None):
-
+        # print(1)
+        # print("Input: ", input_sequences)
         embedded = self.encoder(input_sequences)
+        # print(2)
         packed = torch.nn.utils.rnn.pack_padded_sequence(embedded, input_sequences_lengths)
+        # print(3)
         outputs, hidden = self.net(packed, hidden)
+        # print(4)
         outputs, output_lengths = torch.nn.utils.rnn.pad_packed_sequence(outputs)  # unpack (back to padded)
+        # print(5)
         fcc = self.fcc_fc(outputs)
+        # print(6)
         fcc = fcc.transpose(0, 1).contiguous()
+        # print(7)
         fcc = fcc.view(-1, self.num_classes)
+        # print(8)
         return fcc, hidden
 
 
