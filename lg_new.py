@@ -36,14 +36,17 @@ def pad_sequence(seq, max_length, pad_label=100):
     seq += [pad_label for i in range(max_length - len(seq))]
     return seq
 
+
 def transform_word(w):
-    if w=='<startVerse>':
+    if w == '<startVerse>':
         return '<'
-    elif w=='<endVerse>':
+    elif w == '<endVerse>':
         return '>'
-    elif w=='<endLine>':
+    elif w == '<endLine>':
         return '\n'
-    else: return w
+    else:
+        return w
+
 
 class FabolousDataset(data.Dataset):
 
@@ -234,7 +237,8 @@ def sample_from_rnn(rnn, starting_sting="<", sample_length=300, temperature=1):
 
         sampled_string += all_characters[int(predicted_label[0])]
 
-        if predicted_label[0]=='>':break
+        if predicted_label[0] == '>':
+            break
         current_input = Variable(predicted_label.unsqueeze(1))
 
         output, hidden = rnn(current_input, [1], hidden=hidden)
@@ -287,7 +291,7 @@ def train(model_file, trainset, out_folder, batch_size=1, epochs=100, bias=0):
             logits, _ = rnn(input_sequences_batch_var, sequences_lengths)
 
             loss = criterion(logits, output_sequences_batch_var)
-            epoch_loss+=loss.data[0]
+            epoch_loss += loss.data[0]
             loss.backward()
 
             optimizer.step()
@@ -295,9 +299,9 @@ def train(model_file, trainset, out_folder, batch_size=1, epochs=100, bias=0):
         print("Epoch %d/%d: Total epochs:%d Loss:%f" % (epoch_number, epochs, epoch_number + bias, epoch_loss))
         print("Saving Model %s" % (model_file))
         torch.save(rnn.state_dict(), model_file)
-        if epoch_loss<best_loss:
+        if epoch_loss < best_loss:
             print('Saving best model')
-            torch.save(rnn.state_dict(),'best'+model_file)
+            torch.save(rnn.state_dict(), 'best' + model_file)
         if rnn.epochs % 10 == 0:
             sent = sample_from_rnn(rnn)
             print("Generated\n", sent)
