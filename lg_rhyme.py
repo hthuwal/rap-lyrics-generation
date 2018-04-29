@@ -320,10 +320,15 @@ def train(model_file, trainset, out_folder, batch_size=1, epochs=100, bias=0):
         print("Saving Model %s" % (model_file))
         torch.save(rnn.state_dict(), model_file)
 
-        sent = sample_from_rnn(rnn)
-        rhyme_density = get_rhyme_density(sent)
+        avg = []
+        for i in range(10):
+            sent = sample_from_rnn(rnn)
+            _temp_density = get_rhyme_density(sent)
+            if _temp_density != -1:
+                avg.append(_temp_density)
 
-        if rhyme_density != -1:
+        if len(avg) != 0:
+            rhyme_density = sum(avg) / len(avg)
             print('rhyme density', rhyme_density)
             if abs(rhyme_density - rhyme_target) < abs(prev_rhym - rhyme_target):
                 print('Saving best model')
