@@ -116,3 +116,11 @@ venv.bak/
 /_temp_file
 
 /_temp_file1
+
+/include/
+
+/songdata.csv
+
+/man/
+
+/pip-selfcheck.json
