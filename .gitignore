@@ -107,3 +107,12 @@ venv.bak/
 
 
 # End of https://www.gitignore.io/api/python
+*.model
+/bin/
+
+/lg_char_kaggle.modelretrain
+
+*.txt
+/_temp_file
+
+/_temp_file1
