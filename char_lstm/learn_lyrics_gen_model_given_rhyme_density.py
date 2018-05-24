@@ -4,7 +4,7 @@ import sys
 
 from torch.autograd import Variable
 from tqdm import tqdm
-from utils_char import LyricsGenerationDataset, FabolousDataset, LG_LSTM, all_characters, use_cuda, post_process_sequence_batch, sample_from_rnn
+from utils_char import LyricsGenerationDataset, FabolousDataset, LG_LSTM, all_characters, use_cuda, post_process_sequence_batch, sample_from_rnn, get_rhyme_density
 
 print("Loading Dataset")
 
@@ -16,6 +16,7 @@ def train(model_file, trainset, out_folder, batch_size=1, epochs=100, bias=0):
 
     rhyme_target = 0.34
     prev_rhym = 0
+
     trainset_loader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=False, num_workers=4, drop_last=True)
     rnn = LG_LSTM(input_size=len(all_characters) + 1, hidden_size=128, num_classes=len(all_characters))
     if os.path.exists(model_file):
@@ -61,6 +62,7 @@ def train(model_file, trainset, out_folder, batch_size=1, epochs=100, bias=0):
         torch.save(rnn.state_dict(), model_file)
 
         avg = []
+        # Generate 10 random verses anc calculate average rhyme density
         for i in range(10):
             sent = sample_from_rnn(rnn)
             _temp_density = get_rhyme_density(sent)
@@ -70,6 +72,7 @@ def train(model_file, trainset, out_folder, batch_size=1, epochs=100, bias=0):
         if len(avg) != 0:
             rhyme_density = sum(avg) / len(avg)
             print('rhyme density', rhyme_density)
+            # If more closer to target density then save the model
             if abs(rhyme_density - rhyme_target) < abs(prev_rhym - rhyme_target):
                 print('Saving best model')
                 torch.save(rnn.state_dict(), 'best_models/' + str(epoch_number) + '_' + model_file)
