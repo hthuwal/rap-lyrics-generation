@@ -5,12 +5,12 @@ import os
 import string
 import torch.utils.data as data
 
-from common_lib.lyrics_database import LyricsDatabase
+from lyrics_database import LyricsDatabase
 from torch.autograd import Variable
 # from util import *
 
 # rhyme density
-from common_lib.rhyme_analizer import get_lyrics_stat
+from rhyme_analizer import get_lyrics_stat
 
 
 def get_rhyme_density(verse):
@@ -66,7 +66,7 @@ class FabolousDataset(data.Dataset):
 
     def __init__(self, min_num_words=None):
 
-        myData = LyricsDatabase('fabolous_parsed/')
+        myData = LyricsDatabase('../fabolous_parsed/')
         self.verseList = myData.get_lyrics_from_artist_as_list_of_verses('fabolous')
 
         self.verseList = [[transform_word(word.strip()) for word in verse] for verse in self.verseList]

@@ -58,7 +58,7 @@ def train(model_file, trainset, out_folder, batch_size=1, epochs=100, bias=0):
         torch.save(rnn.state_dict(), model_file)
         if epoch_loss < best_loss:
             print('Saving best model')
-            torch.save(rnn.state_dict(), 'best' + model_file)
+            torch.save(rnn.state_dict(), model_file + "_best")
         if rnn.epochs % 10 == 0:
             sent = sample_from_rnn(rnn)
             print("Generated\n", sent)
@@ -70,6 +70,6 @@ def train(model_file, trainset, out_folder, batch_size=1, epochs=100, bias=0):
 
 
 if sys.argv[1] == "fab":
-    train("lg_char_fabolous_new.model", trainset2, "fabolous_out_new", batch_size=1, epochs=5000, bias=0)
+    train("models/lg_char_fabolous.model", trainset2, "outputs/fabolous", batch_size=1, epochs=5000, bias=0)
 else:
     train("lg_char_kaggle.model", trainset1, "lg", batch_size=100, epochs=100)
