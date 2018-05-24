@@ -1,5 +1,6 @@
 from __future__ import print_function
 import locale
+import os
 import argparse
 import subprocess
 
@@ -24,9 +25,12 @@ def run_command(cmd, arguments):
 def get_lyrics_stat(filename):
     cmd = 'bash'
     #jar_path = ".:analyze/copylibstask.jar:./weka.jar"
-    arguments = ['../run.sh', filename]
+    cur_dir = os.getcwd()
+    filename = os.path.abspath(filename)
+    os.chdir("../analyze")
+    arguments = ['run.sh', filename]
     output = run_command(cmd, arguments)
-
+    os.chdir(cur_dir)
     result = {}
     for line in output.split('\n'):
         dv = line.split(':')

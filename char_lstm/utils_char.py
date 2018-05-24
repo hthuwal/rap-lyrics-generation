@@ -32,7 +32,7 @@ def save_text(output_file_path, text):
 
 def get_rhyme_density(verse):
 
-    file_n = os.path.join(os.getcwd() + '/_temp_file1')
+    file_n = os.path.join(os.getcwd(), '_temp_file1')
     f = open(file_n, 'w')
     f.write(verse.replace('<', '').replace('>', '').replace('\n', ' '))
     f.close()
