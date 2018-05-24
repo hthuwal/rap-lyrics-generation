@@ -24,7 +24,7 @@ def run_command(cmd, arguments):
 def get_lyrics_stat(filename):
     cmd = 'bash'
     #jar_path = ".:analyze/copylibstask.jar:./weka.jar"
-    arguments = ['run.sh', filename]
+    arguments = ['../run.sh', filename]
     output = run_command(cmd, arguments)
 
     result = {}
