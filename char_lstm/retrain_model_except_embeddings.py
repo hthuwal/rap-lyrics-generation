@@ -35,6 +35,8 @@ def train(model_file, trainset, out_folder, batch_size=1, epochs=100, bias=0):
         parameters.append(param)
 
     parameters[0].requires_grad = False
+
+    # Optimizing everything except the embeddings
     optimizer = torch.optim.Adam(parameters[1:], lr=learning_rate)
     criterion = torch.nn.CrossEntropyLoss().cuda()
 
