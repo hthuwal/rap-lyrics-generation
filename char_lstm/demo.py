@@ -26,5 +26,5 @@ def demo_loop(model_file):
             break
 
 
-model_name = 'best_models_retrain/43_lg_char_kaggle.model'
+model_name = 'models/best_models_retrain/43_lg_char_kaggle_retrain.model'
 demo_loop(model_name)
