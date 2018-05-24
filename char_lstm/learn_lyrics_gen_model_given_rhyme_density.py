@@ -64,7 +64,8 @@ def train(model_file, trainset, out_folder, batch_size=1, epochs=100, bias=0):
 
         avg = []
         # Generate 10 random verses anc calculate average rhyme density
-        for i in range(10):
+        print("Generating 10 Random Verses and calculating their rhyme densities")
+        for i in tqdm(range(10)):
             sent = sample_from_rnn(rnn)
             _temp_density = get_rhyme_density(sent)
             if _temp_density != -1:
