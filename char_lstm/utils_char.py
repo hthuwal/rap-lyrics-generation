@@ -36,11 +36,14 @@ def get_rhyme_density(verse):
     f = open(file_n, 'w')
     f.write(verse.replace('<', '').replace('>', '').replace('\n', ' '))
     f.close()
-    stat = get_lyrics_stat(file_n)
+    try:
+        stat = get_lyrics_stat(file_n)
 
-    if 'Rhyme_Density' in stat:
-        return stat['Rhyme_Density']
-    return -1
+        if 'Rhyme_Density' in stat:
+            return stat['Rhyme_Density']
+        return -1
+    except Exception as e:
+        return -1
 
 
 all_characters = string.printable  # list of all characters that can be printed
