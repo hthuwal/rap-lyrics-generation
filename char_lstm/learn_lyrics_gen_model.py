@@ -6,7 +6,6 @@ from torch.autograd import Variable
 from tqdm import tqdm
 from utils_char import LyricsGenerationDataset, FabolousDataset, LG_LSTM, all_characters, use_cuda, post_process_sequence_batch, sample_from_rnn
 
-
 print("Loading Dataset")
 
 trainset1 = LyricsGenerationDataset(csv_file_path='songdata.csv')  # dataset of 55000 songs mixed artist
