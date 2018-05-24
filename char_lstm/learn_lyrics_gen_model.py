@@ -4,7 +4,7 @@ import sys
 
 from torch.autograd import Variable
 from tqdm import tqdm
-from utils_char import LyricsGenerationDataset, FabolousDataset, LG_LSTM, all_characters, use_cuda, post_process_sequence_batch, sample_from_rnn
+from utils_char import *
 
 print("Loading Dataset")
 
@@ -15,9 +15,11 @@ trainset2 = FabolousDataset(min_num_words=175)  # fabulous dataset
 def train(model_file, trainset, out_folder, batch_size=1, epochs=100, bias=0):
     trainset_loader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=False, num_workers=4, drop_last=True)
     rnn = LG_LSTM(input_size=len(all_characters) + 1, hidden_size=128, num_classes=len(all_characters))
-    if os.path.exists(model_file):
+    model_path = os.path.join("models", model_file)
+    out_folder = os.path.join("outputs", out_folder)
+    if os.path.exists(model_path):
         print("Loading Model")
-        rnn.load_state_dict(torch.load(model_file, map_location=lambda storage, loc: storage))
+        rnn.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
 
     print("use_cuda ", use_cuda)
     if use_cuda:
@@ -54,22 +56,21 @@ def train(model_file, trainset, out_folder, batch_size=1, epochs=100, bias=0):
             optimizer.step()
 
         print("Epoch %d/%d: Total epochs:%d Loss:%f" % (epoch_number, epochs, epoch_number + bias, epoch_loss))
-        print("Saving Model %s" % (model_file))
-        torch.save(rnn.state_dict(), model_file)
+        save_model(model_path, rnn, "Saving Model %s" % (model_path))
+
         if epoch_loss < best_loss:
-            print('Saving best model')
-            torch.save(rnn.state_dict(), model_file + "_best")
+            save_model(model_path + "_best", rnn, msg="Saving Best Model")
+
         if rnn.epochs % 10 == 0:
             sent = sample_from_rnn(rnn)
             print("Generated\n", sent)
-            out_f = open('%s/%d.txt' % (out_folder, epoch_number + bias), 'w')
-            out_f.write("%f\n" % (loss) + sent)
-            out_f.close()
+            output_file = os.path.join(out_folder, "%d.txt" % (epoch_number + bias))
+            save_text(output_file, "%f\n" % (epoch_loss) + sent)
 
         rnn.epochs += 1
 
 
 if sys.argv[1] == "fab":
-    train("models/lg_char_fabolous.model", trainset2, "outputs/fabolous", batch_size=1, epochs=5000, bias=0)
+    train("lg_char_fabolous.model", trainset2, "fabolous", batch_size=1, epochs=5000, bias=0)
 else:
     train("lg_char_kaggle.model", trainset1, "lg", batch_size=100, epochs=100)

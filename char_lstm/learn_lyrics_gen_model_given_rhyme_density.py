@@ -4,7 +4,7 @@ import sys
 
 from torch.autograd import Variable
 from tqdm import tqdm
-from utils_char import LyricsGenerationDataset, FabolousDataset, LG_LSTM, all_characters, use_cuda, post_process_sequence_batch, sample_from_rnn, get_rhyme_density
+from utils_char import *
 
 print("Loading Dataset")
 
@@ -19,9 +19,11 @@ def train(model_file, trainset, out_folder, batch_size=1, epochs=100, bias=0):
 
     trainset_loader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=False, num_workers=4, drop_last=True)
     rnn = LG_LSTM(input_size=len(all_characters) + 1, hidden_size=128, num_classes=len(all_characters))
-    if os.path.exists(model_file):
+    model_path = os.path.join("models", model_file)
+    out_folder = os.path.join("outputs", out_folder)
+    if os.path.exists(model_path):
         print("Loading Model")
-        rnn.load_state_dict(torch.load(model_file, map_location=lambda storage, loc: storage))
+        rnn.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
 
     print("use_cuda ", use_cuda)
     if use_cuda:
@@ -58,8 +60,7 @@ def train(model_file, trainset, out_folder, batch_size=1, epochs=100, bias=0):
             optimizer.step()
 
         print("Epoch %d/%d: Total epochs:%d Loss:%f" % (epoch_number, epochs, epoch_number + bias, epoch_loss))
-        print("Saving Model %s" % (model_file))
-        torch.save(rnn.state_dict(), model_file)
+        save_model(model_path, rnn, "Saving Model %s" % (model_path))
 
         avg = []
         # Generate 10 random verses anc calculate average rhyme density
@@ -75,20 +76,20 @@ def train(model_file, trainset, out_folder, batch_size=1, epochs=100, bias=0):
             # If more closer to target density then save the model
             if abs(rhyme_density - rhyme_target) < abs(prev_rhym - rhyme_target):
                 print('Saving best model')
-                torch.save(rnn.state_dict(), 'best_models/' + str(epoch_number) + '_' + model_file)
+                best_model_path = os.path.join("models", "best_models_given_rhyme_density", str(epoch_number) + '_' + model_file)
+                save_model(best_model_path, rnn, msg="Saving best Model")
                 prev_rhym = rhyme_density
 
         if rnn.epochs % 10 == 0:
             sent = sample_from_rnn(rnn)
             print("Generated\n", sent)
-            out_f = open('%s/%d.txt' % (out_folder, epoch_number + bias), 'w')
-            out_f.write("%f\n" % (epoch_loss) + sent)
-            out_f.close()
+            output_file = os.path.join(out_folder, "%d.txt" % (epoch_number + bias))
+            save_text(output_file, "%f\n" % (epoch_loss) + sent)
 
         rnn.epochs += 1
 
 
 if sys.argv[1] == "fab":
-    train("lg_char_fabolous_new2.model", trainset2, "fabolous_out_new2", batch_size=1, epochs=1000, bias=0)
+    train("lg_char_fabolous_given_rhyme_density.model", trainset2, "fabolous_given_rhyme_density", batch_size=1, epochs=1000, bias=0)
 else:
-    train("lg_char_kaggle.model", trainset1, "lg", batch_size=100, epochs=100)
+    train("lg_char_kaggle_given_rhyme_density.model", trainset1, "lg_given_rhyme_density", batch_size=100, epochs=100)

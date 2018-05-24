@@ -13,6 +13,23 @@ from torch.autograd import Variable
 from rhyme_analizer import get_lyrics_stat
 
 
+def save_model(path, model, msg="Saving Model"):
+    directory = os.path.dirname(path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    print(msg)
+    torch.save(model.state_dict(), path)
+
+
+def save_text(output_file_path, text):
+    directory = os.path.dirname(output_file_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    out_f = open(output_file_path, 'w')
+    out_f.write(text)
+    out_f.close()
+
+
 def get_rhyme_density(verse):
 
     file_n = os.path.join(os.getcwd() + '/_temp_file1')
