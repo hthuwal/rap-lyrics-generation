@@ -35,15 +35,15 @@ def evaluate_model(model_file):
         rhyme_density = sum(avg) / len(avg)
         avg_len = sum(lens) / len(lens)
         print('rhyme density for model %s : %f : average length %d' % (model_file, rhyme_density, avg_len))
-        f = open('evaluated_transfer2/' + model_file.split('/')[1] + '.txt', 'w')
+        f = open('evaluated_transfer/' + model_file.split('/')[1] + '.txt', 'w')
         f.write("%f\n%s" % (rhyme_density, "\n\n".join(sents)))
         f.close()
     else:
         print('rhyme density for model %s not well formed' % model_file)
 
 
-models = os.listdir('best_models_retrain/')
+models = os.listdir('models/best_models_retrain/')
 
 for model_file in models:
-    print('best_models_retrain/' + model_file)
-    evaluate_model('best_models_retrain/' + model_file)
+    print('models/best_models_retrain/' + model_file)
+    evaluate_model('models/best_models_retrain/' + model_file)
